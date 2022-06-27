@@ -26,20 +26,20 @@ Image access:
 ## SQL Tables:       
 
 user table:       
-| Field type | Name | Note |       
+| Field type | Name | Notes |       
 | - | - | - |       
 | Key/Int(auto increment) | uid | |       
 | String | $auth | Unique auth cookie |       
 
 image table:       
-| Field type | Name |       
+| Field type | Name | Notes |      
 | - | - | - |       
 | Key/Int(auto increment) | imgID | - |       
 | Int | uid | - |       
 | String | extension | - |       
 
 rating table:       
-| Field type | Name |       
+| Field type | Name | Notes |       
 | - | - | - |       
 | Int | imgID | - |       
 | Int | voteCount | - |       
