@@ -1,0 +1,6 @@
+parameters:
+    amazon.s3.key:     "your-aws-key"
+    amazon.s3.secret:  "your-aws-secret"
+    amazon.s3.bucket:  "your-bucket.example.com"
+    amazon.s3.region:  "your-bucket-region"
+    amazon.s3.version: "2006-03-01"
