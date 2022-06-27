@@ -4,10 +4,8 @@ HelloImage
 An example RESTfull symfony image upload service;       
 A register-less image upload service;        
 
-When visitting a website for the first time sets a unique UID cookie;       
+When visitting a website for the first time sets a unique AUTH cookie;     
 When you make an api request requiring a cookie your       
-
-$auth cookie;
 
 ## API:       
 | Path | Methods | Function | JsonResp |       
@@ -32,15 +30,9 @@ user table:
 | String | $auth | Unique auth cookie |       
 
 image table:       
-| Field type | Name | Notes |      
+| Field type | Name | Note |        
 | - | - | - |       
 | Key/Int(auto increment) | imgID | - |       
 | Int | uid | - |       
-| String | extension | - |       
-
-rating table:       
-| Field type | Name | Notes |       
-| - | - | - |       
-| Int | imgID | - |       
-| Int | voteCount | - |       
-
+| String | extension | - |   
+| Int | voteCount | This should prevent a race condition on creation of new rating entry |

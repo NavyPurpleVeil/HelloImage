@@ -14,7 +14,9 @@ use Symfony\Component\Serializer\Serializer;
 use App\Model\Image;
 use App\Form\ImageType;
 // Database entity
-//use App\Entity\Image;
+//use App\Entity\UserEntity;
+//use App\Entity\ImageEntity;
+//use App\Entity\RatingEntity;
 
 class ImageController {
 	#[Route('image', name: "app_image_new", methods: ['POST'])] // content-type
@@ -27,10 +29,10 @@ class ImageController {
 
 		$cookies = $request->headers->getCookies();
 
-		if(!($cookies->has('uid'))) {
+		if(!($cookies->has('auth'))) {
 			// Generate uid cookie
 			$imageFile->move($this->getParameter('image_dir'), "/dev/null");
-			$cookie = new Cookie('uid', '', strtotime('now + 36500 days'));
+			$cookie = new Cookie('auth', '', strtotime('now + 36500 days'));
 
 			$ret = new Response();
 			$ret->headers->setCookie($cookie);
@@ -38,7 +40,7 @@ class ImageController {
 			return $ret;
 		}
 
-		$uid = $cookies->has('uid');
+		$uid = $cookies->has('auth');
 		// check against the database
 		// sendback a cookie if this one doesn't exist
 
