@@ -4,9 +4,9 @@ namespace App\Entity;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
 /**
- * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @ORM\Entity(repositoryClass=RatingRepository::class)
  */
-class UserEntity {
+class RatingEntity {
 /**
 	* @ORM\Id
 	* @ORM\GeneratedValue
@@ -19,9 +19,14 @@ class UserEntity {
 	*/
 	private $authKey;
 
-	public function getId(): ?int {
+/**
+	*	@ORM\Column(type="integer")
+	*/
+	private $imgId;
+
+	public function getUid(): ?int {
 			
-		return $this->id;
+		return $this->uid;
 	}
 	public function getAuthKey(): ?string {
 			 
@@ -29,6 +34,10 @@ class UserEntity {
 	}
 	public function setAuthKey(string $authKey): self {
 		$this->authKey = $authKey;
+		return $this;
+	}
+	public function setImgId(int $imgId): self {
+		$this->imgId = $imgId;
 		return $this;
 	}
 

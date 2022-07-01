@@ -1,23 +1,22 @@
 <?php
 namespace App\Repository;
 
-use App\Entity\UserEntity;
+use App\Entity\RatingEntity;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-class UserRepository extends ServiceEntityRepository
+class RatingRepository extends ServiceEntityRepository
 {
 	public function __construct(ManagerRegistry $registry) {
-		parent::__construct($registry, UserEntity::class);
+		parent::__construct($registry, RatingEntity::class);
 	}
 	
-	public function findByAuthKey(string $authKey) : array {
-		$entMan = $this->getEntityManager();
+	public function findByAuthKey(string $authKey, int $id) : array {
+		$entityManager = $this->getEntityManager();
 
-		$query = $entMan->createQuery(
-			'SELECT u FROM App\Entity\UserEntity u WHERE u.authKey = :authKey '
-		);
-		$query->setParameter('authKey', $authKey);
+		$query = $entityManager->createQuery(
+			'SELECT u FROM App\Entity\RatingEntity u WHERE u.authKey = :authKey '
+		)->setParameter('authKey', $authKey);
 		return $query->getResult();
 	}
 

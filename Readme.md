@@ -19,7 +19,8 @@ When you make an api request requiring a cookie your
 Image access:       
 | Path | Methods | Function | JsonResp |       
 | - | - | - | - |       
-| /uploads/${id}.{png/webp/jpeg} | GET | Gets an image | none |       
+| /uploads/${id}.{png/webp/jpeg} | GET | Image path | none |       
+| /uploads/${id} | GET | Webpage | none |  
 
 ## SQL Tables:       
 
@@ -36,3 +37,10 @@ image table:
 | Int | uid | - |       
 | String | extension | - |   
 | Int | voteCount | This should prevent a race condition on creation of new rating entry |
+
+rating table:       
+| Field type | Name | Note |        
+| - | - | - |     
+| Key/Int(auto increment) | voteId | - |     
+| Int | imgID | - |       
+| Int | uid | - |       

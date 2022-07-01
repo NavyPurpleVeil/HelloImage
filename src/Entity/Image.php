@@ -8,19 +8,23 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass=ImageRepository::class)
  */
 class ImageEntity {
-
-		#[ORM\Id]
-		#[ORM\GeneratedValue]
-		#[ORM\Column(type: "integer")]
+/**
+	*	@ORM\Id
+	*	@ORM\GeneratedValue
+	*	@ORM\Column(type="integer")
+	*/
 		private $id;
-
-		#[ORM\Column(type:"integer")]
+/**
+	*	@ORM\Column(type="integer")
+	*/
 		private $uid;
-
-		#[ORM\Column(type:"string", length:255)]    
+/**
+	*	@ORM\Column(type="string", length=255)
+	*/
 		private $extension;
-
-		#[ORM\Column(type:"integer")]
+/**
+	*	@ORM\Column(type="integer")
+	*/
 		private $voteCount;
 
 
@@ -37,11 +41,11 @@ class ImageEntity {
 			return $this->uid;
 		}
 
-		public function setAuthKey(int $uid): self {
+		public function setUid(int $uid): self {
 			$this->uid = $uid;
 			return $this;
 		}
-		public function setExtension(string extension): self {
+		public function setExtension(string $extension): self {
 			$this->extension = $extension;
 			return $this;
 		}
@@ -49,4 +53,9 @@ class ImageEntity {
 			$this->coteCount = $voteCount;
 			return $this;
 		}
+	public function __construct(int $id) {
+		// Use this constructor only to set $id value when dealing with an sql array on custom findBy functions
+		$this->id = $id;
+	}
+
 }
