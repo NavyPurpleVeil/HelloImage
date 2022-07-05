@@ -189,7 +189,7 @@ class ImageController {
 		}
 		
 		$filename = $this->getParameter('image_dir') . strval($ImgRep->getId()) . $ImgRep->getExtension();
-		new Filesystem->remove($filename);
+		new Filesystem.remove($filename);
 		$ImgRep->removeByAuthKeyId($imgId, $authKey);
 
 		$ret = new Response();
@@ -231,7 +231,7 @@ class ImageController {
 
 	}
 	#[Route('rating/{imgId}', methods: ['POST'])]
-	public function addRating(int $imgId, UserRepository $UserRep, ImageRepository $ImgRep, RatingRepository $RateRep)): Response {
+	public function addRating(int $imgId, UserRepository $UserRep, ImageRepository $ImgRep, RatingRepository $RateRep): Response {
 
 		$cookies = $request->headers->getCookies();
 
@@ -241,7 +241,7 @@ class ImageController {
 
 		$authKey = $cookies->get('auth');
 		$user = $UserRep->findBy(array(),array('$authKey'=>$authKey));
-		if($user == NULL) {filesystem
+		if($user == NULL) {
 			return authFailureResp();
 		}
 
@@ -267,7 +267,7 @@ class ImageController {
 		return $ret;
 	}
 	#[Route('rating/{imgId}', methods: ['DELETE'])]
-	public function removeRating(int $imgId, UserRepository $UserRep, ImageRepository $ImgRep, RatingRepository $RateRep)): Response {
+	public function removeRating(int $imgId, UserRepository $UserRep, ImageRepository $ImgRep, RatingRepository $RateRep): Response {
 		$cookies = $request->headers->getCookies();
 
 		if(!($cookies->has('auth'))) {

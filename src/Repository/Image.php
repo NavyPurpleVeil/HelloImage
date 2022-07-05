@@ -65,7 +65,7 @@ class ImageRepository extends ServiceEntityRepository {
 		$query->setParameter('id', $id);
 		return $query->getResult();
 	}
-	public function incrementVoteCount(int $id) : array {
+	public function decrementVoteCount(int $id) : array {
 		$entMan = $this->getEntityManager();
 		$query = $entMan->createQuery(
 			'UPDATE App\Entity\ImageEntity i SET i.voteCount = i.voteCount - 1;'
