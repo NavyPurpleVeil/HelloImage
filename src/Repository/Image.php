@@ -14,7 +14,7 @@ class ImageRepository extends ServiceEntityRepository {
 		$entMan = $this->getEntityManager();
 
 		$query = $entMan->createQuery(
-			'SELECT u FROM App\Entity\UserEntity u RIGHT OUTER JOIN  App\Entity\ImageEntity i ON u.uid = i.uid WHERE u.authkey = :authKey'
+			'SELECT u FROM App\Entity\UserEntity u RIGHT OUTER JOIN  App\Entity\ImageEntity i ON u.uid = i.uid WHERE u.authkey = :authKey;'
 		);
 		$query->setParameter('authKey', $authKey);
 		return $query->getResult();
@@ -23,7 +23,7 @@ class ImageRepository extends ServiceEntityRepository {
 		$entMan = $this->getEntityManager();
 
 		$query = $entMan->createQuery(
-			'SELECT u FROM App\Entity\UserEntity u RIGHT OUTER JOIN  App\Entity\ImageEntity i ON u.uid = i.uid WHERE u.authkey = :authKey && i.id = :id'
+			'SELECT u FROM App\Entity\UserEntity u RIGHT OUTER JOIN  App\Entity\ImageEntity i ON u.uid = i.uid WHERE u.authkey = :authKey && i.id = :id;'
 		);
 		$query->setParameter('authKey', $authKey);
 		$query->setParameter('id', $id);
@@ -33,7 +33,7 @@ class ImageRepository extends ServiceEntityRepository {
 		$entMan = $this->getEntityManager();
 
 		$query = $entMan->createQuery(
-			'DELETE u FROM App\Entity\ImageEntity i LEFT OUTER JOIN  App\Entity\UserEntity u ON u.uid = i.uid WHERE u.authkey = :authKey && i.id = :id'
+			'DELETE u FROM App\Entity\ImageEntity i LEFT OUTER JOIN  App\Entity\UserEntity u ON u.uid = i.uid WHERE u.authkey = :authKey && i.id = :id;'
 		);
 		$query->setParameter('authKey', $authKey);
 		$query->setParameter('id', $id);
@@ -43,9 +43,35 @@ class ImageRepository extends ServiceEntityRepository {
 	public function getRatingCount(int $id) : array {
 		$entMan = $this->getEntityManager();
 		$query = $entMan->createQuery(
-			'SELECT i FROM App\Entity\ImageEntity i where i.id= :id'
+			'SELECT i FROM App\Entity\ImageEntity i where i.id= :id;'
 		);
 		$query->setParameter('id', $id);
-		return $query->getResult(); // what is being returned is an array, how to access the data
+		return $query->getResult();
 	}
+	public function getAllRatingCounts(string $authKey, int $offset) : array {
+		$entMan = $this->getEntityManager();
+		$query = $entMan->createQuery(
+			'SELECT i FROM App\Entity\ImageEntity i where i.id = :id OFFSET :offset LIMIT 50 ;'
+		);
+		$query->setParameter('id', $id);
+		$query->setParameter('offset', $offset);
+		return $query->getResult();
+	}
+	public function incrementVoteCount(int $id) : array {
+		$entMan = $this->getEntityManager();
+		$query = $entMan->createQuery(
+			'UPDATE App\Entity\ImageEntity i SET i.voteCount = i.voteCount + 1;'
+		);
+		$query->setParameter('id', $id);
+		return $query->getResult();
+	}
+	public function incrementVoteCount(int $id) : array {
+		$entMan = $this->getEntityManager();
+		$query = $entMan->createQuery(
+			'UPDATE App\Entity\ImageEntity i SET i.voteCount = i.voteCount - 1;'
+		);
+		$query->setParameter('id', $id);
+		return $query->getResult();		
+	}
+
 }

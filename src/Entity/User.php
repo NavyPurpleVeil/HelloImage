@@ -32,9 +32,4 @@ class UserEntity {
 		return $this;
 	}
 
-	public function __construct(int $id) {
-		// Use this constructor only to set $id value when dealing with an sql array on custom findBy functions
-		$this->id = $id;
-	}
-
 }

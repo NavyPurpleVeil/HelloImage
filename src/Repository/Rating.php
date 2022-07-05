@@ -20,13 +20,4 @@ class RatingRepository extends ServiceEntityRepository
 		return $query->getResult();
 	}
 
-	// isUnique() if it is unique == Invalid key/or this key can be inserted
-	public function isUnique(string $authKey): bool {
-		if($this->findByAuthKey(authKey)->count() != 0) {
-			return false;
-		}
-		return true;
-	}
-
-
 }

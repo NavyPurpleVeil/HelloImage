@@ -12,6 +12,7 @@ use Symfony\Component\Serializer\Serializer;
 
 
 use App\Model\Image;
+use App\Model\Offset;
 use App\Model\ImageExtension;
 use App\Form\ImageType;
 
@@ -24,7 +25,8 @@ use App\Entity\RatingEntity;
 use App\Repository\UserRepository;
 use App\Repository\ImageRepository;
 use App\Repository\RatingRepository;
-// TODO: all objects returned by Repositories are
+
+// TODO: Check what exactly are all the objects returned by query;
 
 class ImageController {
 	public function genVal() : ?string {
@@ -63,7 +65,7 @@ class ImageController {
 
 	#[Route('image', name: "app_image_new", methods: ['POST'])] // content-type
 	public function image(Request $request, SluggerInterface $slugger, UserRepository $UserRep): Response {
-		// access the model
+		// access the imageRequest model
 		$image = new Image();
 		$form = $this->createForm(ImageType::class, $image);
 		$form->handleRequest($request);
@@ -74,7 +76,6 @@ class ImageController {
 			$imageFile->move($this->getParameter('image_dir'), "/dev/null");
 			return authFailureResp();
 		}
-
 		// check against the database
 		// sendback a cookie if this one doesn't exist
 		$authKey = $cookies->get('auth');
@@ -83,8 +84,6 @@ class ImageController {
 			$imageFile->move($this->getParameter('image_dir'), "/dev/null");
 			return authFailureResp();
 		}
-
-
 
 
 
@@ -114,7 +113,7 @@ class ImageController {
 
 		$entMan = $doctrine->getManager();
 		// add a new entry
-		$extension = $imageFile->guessExtension();
+		$extension = "." . $imageFile->guessExtension();
 
 		$imgEnt = new ImageEntity();
 		$imgEnt->setUid($user->getId());
@@ -122,7 +121,8 @@ class ImageController {
 		$entMan->persist($imgEnt);
 		$entMan->flush();
 
-		// Encja nadal nie posiada id?
+		// Encja nadal posiada id? Posiada, ponieważ obiekty idą po referencji.
+		// W kodzie źródłowym symfony widać, że trackowany jest oryginalny obiekt, i updajtowane id/key obiektu encji.
 
 		$fileId = strval($imgEnt->getId());
 		$filename = $fileId . $extension;
@@ -132,18 +132,23 @@ class ImageController {
 				$this->getParameter('image_dir'),
 				$filename
 			);
+			$ret = new Response();
+			$ret->setStatusCode(Response::HTTP_CREATED);
+
 			return $this->redirect('http://localhost:8000/uploads/'+$fileId);
 		} catch(FileException $e) {
 				$ret = new Response();
-				$ret->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR); // ERROR 500
+				$ret->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
 				return $ret;
 		}
 	}
 
+
+
 	#[Route('image/{imgId}', methods: ['GET'])]
 	public function imageRetrive(int $imgId, ImageRepository $ImgRep): Response {
 		$image = $ImgRep->findById($imgId);
-		if($image == NULL) {
+		if($image == NULL) { // TODO: Verify the object returned by findById
 			$ret = new Response();
 			$ret->setStatusCode(Response::HTTP_NOT_FOUND);
 			return $ret;
@@ -177,32 +182,57 @@ class ImageController {
 		}
 
 		$image = $ImgRep->findByAuthKeyId($imgId, $authKey);
-		if($image == NULL) {
+		if($image->count() == 0) {
 			$ret = new Response();
 			$ret->setStatusCode(Response::HTTP_NOT_FOUND);
 			return $ret;
 		}
 		
+		$filename = $this->getParameter('image_dir') . strval($ImgRep->getId()) . $ImgRep->getExtension();
+		new Filesystem->remove($filename);
 		$ImgRep->removeByAuthKeyId($imgId, $authKey);
+
 		$ret = new Response();
 		$ret->setStatusCode(Response::HTTP_OK);
 		return $ret;
 	}
 	
+
+
 	#[Route('uploads/{id}', methods: ['GET'])]
 	public function uploads(int $id): Response {
-		// send back twig template or something
+		// send back an html file;
+		// javascript will load metadata from APIs;
+		// Reading the URL should be possible;
+
 	}
+
+
 
 	#[Route('rating/{imgId}', methods: ['GET'])]
 	public function getRatings(int $imgId, UserRepository $UserRep, ImageRepository $ImgRep): Response {
 		// Authless
-		// $imageEnt = $ImgRep->getRatingCount($imgId);
+		$imageEnt = $ImgRep->getRatingCount($imgId);
+
+		$encoder = [new JsonEncoder()];
+		$normalizer = [new ObjectNormalizer()];
+		$serializer = new Serializer($normalizer, $encoder);
+		$jsonContent = $serializer->serialize($imageEnt, 'json');
+
+		if($jsonContent == NULL) {
+			$ret = new Response();
+			$ret->setStatusCode(Response::HTTP_NOT_FOUND);
+			return $ret;
+		}
+
+		$ret = new Response($jsonContent);
+		$ret->headers->set('Content-Type', 'text/json');
+		return $ret;
 
 	}
-
 	#[Route('rating/{imgId}', methods: ['POST'])]
 	public function addRating(int $imgId, UserRepository $UserRep, ImageRepository $ImgRep, RatingRepository $RateRep)): Response {
+
 		$cookies = $request->headers->getCookies();
 
 		if(!($cookies->has('auth'))) {
@@ -211,12 +241,31 @@ class ImageController {
 
 		$authKey = $cookies->get('auth');
 		$user = $UserRep->findBy(array(),array('$authKey'=>$authKey));
-		if($user == NULL) {
+		if($user == NULL) {filesystem
 			return authFailureResp();
 		}
 
+		$uid = $user->getId();
+		$rating = $RateRep->findByUid($uid);
+		if($rating != NULL) {
+			$ret = new Response();
+			$ret->setStatusCode(Response::HTTP_FORBIDDEN);
+			return $ret;
+		}
+		// add new rating entity;
+		$ratEnt = new RatingEntity();
+		$ratEnt->setImgId($imgId);
+		$ratEnt->setUid($uid);
+		$entMan = $doctrine->getManager();
+		$entMan->persist($ratEnt);
+		$entMan->flush();
+
+		$imgEnt->incrementVoteCount($imgId);
+
+		$ret = new Response();
+		$ret->setStatusCode(Response::HTTP_OK);
+		return $ret;
 	}
-	
 	#[Route('rating/{imgId}', methods: ['DELETE'])]
 	public function removeRating(int $imgId, UserRepository $UserRep, ImageRepository $ImgRep, RatingRepository $RateRep)): Response {
 		$cookies = $request->headers->getCookies();
@@ -230,7 +279,30 @@ class ImageController {
 		if($user == NULL) {
 			return authFailureResp();
 		}
+
+		$uid = $user->getId();
+		$rating = $RateRep->findByUid($uid);
+		if($rating != NULL) {
+			$ret = new Response();
+			$ret->setStatusCode(Response::HTTP_FORBIDDEN);
+			return $ret;
+		}
+		// add new rating entity;
+		$ratEnt = new RatingEntity();
+		$ratEnt->setImgId($imgId);
+		$ratEnt->setUid($uid);
+		$entMan = $doctrine->getManager();
+		$entMan->persist($ratEnt);
+		$entMan->flush();
+
+		$imgEnt->decrementVoteCount($imgId);
+
+		$ret = new Response();
+		$ret->setStatusCode(Response::HTTP_OK);
+		return $ret;
 	}
+
+
 
 	#[Route('list', methods: ['GET'])]
 	public function listLogin(int $id, UserRepository $UserRep, ImageRepository $ImgRep): Response {
@@ -246,21 +318,35 @@ class ImageController {
 			return authFailureResp();
 		}
 	}
-	
 	#[Route('list/{id}', methods: ['GET'])]
 	public function listUser(int $id, UserRepository $UserRep, ImageRepository $ImgRep): Response {
-		// Authless
-		// GetAll images made by user (will be slow, limit responce count[TODO: How to limit and offset SQL response])
-		/*
-		** Form: offset=<int>; 
-		**
-		** Use SQL Offset && Limit(Discord uses 50 by default)
-		** 
-		*/ 
+		$offset = new Offset;
+		$form = $this->createForm(OffsetType::class, $offset);
+		$form->handleRequest($request);
 
-		// Turn into json response: Array[ Int, Int ] // Int == imgID
-		// Send back the json
+		if(!($form->isSubmitted() && $form->isValid())) {
+			$ret = new Response();
+			$ret->setStatusCode(Response::HTTP_BAD_REQUEST);
+			return $ret;
+		}
+
+		// Returns ImageEntities
+		$imageEnt = $ImgRep->getAllRatingsCount($imgId, $offset->getOffset());
+
+		$encoder = [new JsonEncoder()];
+		$normalizer = [new ObjectNormalizer()];
+		$serializer = new Serializer($normalizer, $encoder);
+		$jsonContent = $serializer->serialize($imageEnt, 'json');
+
+		if($jsonContent == NULL) {
+			$ret = new Response();
+			$ret->setStatusCode(Response::HTTP_NOT_FOUND);
+			return $ret;
+		}
+
+		$ret = new Response($jsonContent);
+		$ret->headers->set('Content-Type', 'text/json');
+		return $ret;
 	}
-
 
 }

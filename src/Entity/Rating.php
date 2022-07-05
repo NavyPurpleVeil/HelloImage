@@ -17,33 +17,28 @@ class RatingEntity {
 /**
 	* @ORM\Column(type="string", length=255)
 	*/
-	private $authKey;
+	private $uid;
 
 /**
 	*	@ORM\Column(type="integer")
 	*/
 	private $imgId;
 
-	public function getUid(): ?int {
+	public function getid(): ?int {
 			
+		return $this->id;
+	}
+	public function getUid(): ?string {
+			 
 		return $this->uid;
 	}
-	public function getAuthKey(): ?string {
-			 
-		return $this->authKey;
-	}
-	public function setAuthKey(string $authKey): self {
-		$this->authKey = $authKey;
+	public function setUid(string $uid): self {
+		$this->uid = $uid;
 		return $this;
 	}
 	public function setImgId(int $imgId): self {
 		$this->imgId = $imgId;
 		return $this;
-	}
-
-	public function __construct(int $id) {
-		// Use this constructor only to set $id value when dealing with an sql array on custom findBy functions
-		$this->id = $id;
 	}
 
 }
