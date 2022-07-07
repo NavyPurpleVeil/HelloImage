@@ -6,7 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=RatingRepository::class)
  */
-class RatingEntity {
+class Rating {
 /**
 	* @ORM\Id
 	* @ORM\GeneratedValue

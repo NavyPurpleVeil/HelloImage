@@ -2,25 +2,27 @@
 namespace App\Controller;
 
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\HeaderBag;
 
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
-
-use App\Model\Image;
 use App\Model\Offset;
 use App\Model\ImageExtension;
 use App\Form\ImageType;
 
 use Doctrine\Persistence\ManagerRegistry;
 
-use App\Entity\UserEntity;
-use App\Entity\ImageEntity;
-use App\Entity\RatingEntity;
+use App\Entity\User;
+use App\Entity\Image;
+use App\Entity\ImageFormRequest;
+use App\Entity\Rating;
 
 use App\Repository\UserRepository;
 use App\Repository\ImageRepository;
@@ -28,7 +30,7 @@ use App\Repository\RatingRepository;
 
 // TODO: Check what exactly are all the objects returned by query;
 
-class ImageController {
+class ImageController extends AbstractController {
 	public function genVal() : ?string {
 		// 1<->3  function;
 		// 1. Get random bytes. 
@@ -45,15 +47,15 @@ class ImageController {
 		// 4.1. False: Go to 1.
 		$unique = false;
 		while(!($unique)) {
-			$authKey = genVal();
+			$authKey = $this->genVal();
 			$unique = $UserRep->isUnique($authKey);
 		}
 
 		$cookie = new Cookie('auth', $authKey, strtotime('now + 36500 days'));
 		
-		$user = new UserEntity();
+		$user = new User();
 		$user->setAuthKey($authKey);
-		$entMan = $doctrine->getManager();
+		$entMan = $this->getDoctrine->getManager();
 		$entMan->persist($user);
 		$entMan->flush();
 		
@@ -64,25 +66,23 @@ class ImageController {
 	}
 
 	#[Route('image', name: "app_image_new", methods: ['POST'])] // content-type
-	public function image(Request $request, SluggerInterface $slugger, UserRepository $UserRep): Response {
+	public function image(Request $request, UserRepository $UserRep): Response {
 		// access the imageRequest model
-		$image = new Image();
+		$image = new ImageFormRequest();
 		$form = $this->createForm(ImageType::class, $image);
 		$form->handleRequest($request);
 
-		$cookies = $request->headers->getCookies();
+		$cookies = $request->cookies->all();
 
-		if(!($cookies->has('auth'))) {
-			$imageFile->move($this->getParameter('image_dir'), "/dev/null");
-			return authFailureResp();
+		if(!(array_key_exists("auth", $cookies))) {
+			return $this->authFailureResp($UserRep);
 		}
 		// check against the database
 		// sendback a cookie if this one doesn't exist
-		$authKey = $cookies->get('auth');
+		$authKey = $cookies["auth"];
 		$user = $UserRep->findBy(array(),array('$authKey'=>$authKey));
 		if($user == NULL) { // what if it doesn't return NULL?
-			$imageFile->move($this->getParameter('image_dir'), "/dev/null");
-			return authFailureResp();
+			return $this->authFailureResp($UserRep);
 		}
 
 
@@ -115,7 +115,7 @@ class ImageController {
 		// add a new entry
 		$extension = "." . $imageFile->guessExtension();
 
-		$imgEnt = new ImageEntity();
+		$imgEnt = new Image();
 		$imgEnt->setUid($user->getId());
 		$imgEnt->setExtension($extension);
 		$entMan->persist($imgEnt);
@@ -169,16 +169,16 @@ class ImageController {
 	}
 	#[Route('image/{imgId}', methods: ['DELETE'])]
 	public function imageRemove(int $imgId, UserRepository $UserRep, ImageRepository $ImgRep): Response {
-		$cookies = $request->headers->getCookies();
+		$cookies = $request->cookies->all();
 
-		if(!($cookies->has('auth'))) {
-			return authFailureResp();
+		if(!(array_key_exists("auth", $cookies))) {
+			return $this->authFailureResp($UserRep);
 		}
 
-		$authKey = $cookies->get('auth');
+		$authKey = $cookies["auth"];
 		$user = $UserRep->findBy(array(),array('$authKey'=>$authKey));
 		if($user == NULL) {
-			return authFailureResp();
+			return $this->authFailureResp($UserRep);
 		}
 
 		$image = $ImgRep->findByAuthKeyId($imgId, $authKey);
@@ -233,27 +233,28 @@ class ImageController {
 	#[Route('rating/{imgId}', methods: ['POST'])]
 	public function addRating(int $imgId, UserRepository $UserRep, ImageRepository $ImgRep, RatingRepository $RateRep): Response {
 
-		$cookies = $request->headers->getCookies();
+		$cookies = $request->cookies->all();
 
-		if(!($cookies->has('auth'))) {
-			return authFailureResp();
+		if(!(array_key_exists("auth", $cookies))) {
+			return $this->authFailureResp($UserRep);
 		}
 
-		$authKey = $cookies->get('auth');
+		$authKey = $cookies["auth"];
 		$user = $UserRep->findBy(array(),array('$authKey'=>$authKey));
 		if($user == NULL) {
-			return authFailureResp();
+			return $this->authFailureResp($UserRep);
 		}
 
 		$uid = $user->getId();
 		$rating = $RateRep->findByUid($uid);
+		// Finds ratings by user id, doesn't match imageid
 		if($rating != NULL) {
 			$ret = new Response();
 			$ret->setStatusCode(Response::HTTP_FORBIDDEN);
 			return $ret;
 		}
 		// add new rating entity;
-		$ratEnt = new RatingEntity();
+		$ratEnt = new Rating();
 		$ratEnt->setImgId($imgId);
 		$ratEnt->setUid($uid);
 		$entMan = $doctrine->getManager();
@@ -268,16 +269,16 @@ class ImageController {
 	}
 	#[Route('rating/{imgId}', methods: ['DELETE'])]
 	public function removeRating(int $imgId, UserRepository $UserRep, ImageRepository $ImgRep, RatingRepository $RateRep): Response {
-		$cookies = $request->headers->getCookies();
+		$cookies = $request->cookies->all();
 
-		if(!($cookies->has('auth'))) {
-			return authFailureResp();
+		if(!(array_key_exists("auth", $cookies))) {
+			return $this->authFailureResp($UserRep);
 		}
 
-		$authKey = $cookies->get('auth');
+		$authKey = $cookies["auth"];
 		$user = $UserRep->findBy(array(),array('$authKey'=>$authKey));
 		if($user == NULL) {
-			return authFailureResp();
+			return $this->authFailureResp($UserRep);
 		}
 
 		$uid = $user->getId();
@@ -287,8 +288,9 @@ class ImageController {
 			$ret->setStatusCode(Response::HTTP_FORBIDDEN);
 			return $ret;
 		}
-		// add new rating entity;
-		$ratEnt = new RatingEntity();
+		// Finds ratings by user id, doesn't match imageid
+		// Adds an entry despite the command requiring a remove
+		$ratEnt = new Rating();
 		$ratEnt->setImgId($imgId);
 		$ratEnt->setUid($uid);
 		$entMan = $doctrine->getManager();
@@ -306,16 +308,16 @@ class ImageController {
 
 	#[Route('list', methods: ['GET'])]
 	public function listLogin(int $id, UserRepository $UserRep, ImageRepository $ImgRep): Response {
-		$cookies = $request->headers->getCookies();
+		$cookies = $request->cookies->all();
 
-		if(!($cookies->has('auth'))) {
-			return authFailureResp();
+		if(!(array_key_exists("auth", $cookies))) {
+			return $this->authFailureResp($UserRep);
 		}
 
-		$authKey = $cookies->get('auth');
+		$authKey = $cookies["auth"];
 		$user = $UserRep->findBy(array(),array('$authKey'=>$authKey));
 		if($user == NULL) {
-			return authFailureResp();
+			return $this->authFailureResp($UserRep);
 		}
 	}
 	#[Route('list/{id}', methods: ['GET'])]

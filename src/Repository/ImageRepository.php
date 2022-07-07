@@ -1,20 +1,20 @@
 <?php
 namespace App\Repository;
 
-use App\Entity\ImageEntity;
+use App\Entity\Image;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 class ImageRepository extends ServiceEntityRepository {
 	public function __construct(ManagerRegistry $registry) {
-			parent::__construct($registry, ImageEntity::class);
+			parent::__construct($registry, Image::class);
 	}
 
 	public function findByAuthKey(string $authKey) : array {
 		$entMan = $this->getEntityManager();
 
 		$query = $entMan->createQuery(
-			'SELECT u FROM App\Entity\UserEntity u RIGHT OUTER JOIN  App\Entity\ImageEntity i ON u.uid = i.uid WHERE u.authkey = :authKey;'
+			'SELECT u FROM App\Entity\User u RIGHT OUTER JOIN  App\Entity\Image i ON u.uid = i.uid WHERE u.authkey = :authKey;'
 		);
 		$query->setParameter('authKey', $authKey);
 		return $query->getResult();
@@ -23,7 +23,7 @@ class ImageRepository extends ServiceEntityRepository {
 		$entMan = $this->getEntityManager();
 
 		$query = $entMan->createQuery(
-			'SELECT u FROM App\Entity\UserEntity u RIGHT OUTER JOIN  App\Entity\ImageEntity i ON u.uid = i.uid WHERE u.authkey = :authKey && i.id = :id;'
+			'SELECT u FROM App\Entity\User u RIGHT OUTER JOIN  App\Entity\Image i ON u.uid = i.uid WHERE u.authkey = :authKey && i.id = :id;'
 		);
 		$query->setParameter('authKey', $authKey);
 		$query->setParameter('id', $id);
@@ -33,7 +33,7 @@ class ImageRepository extends ServiceEntityRepository {
 		$entMan = $this->getEntityManager();
 
 		$query = $entMan->createQuery(
-			'DELETE u FROM App\Entity\ImageEntity i LEFT OUTER JOIN  App\Entity\UserEntity u ON u.uid = i.uid WHERE u.authkey = :authKey && i.id = :id;'
+			'DELETE u FROM App\Entity\Image i LEFT OUTER JOIN  App\Entity\User u ON u.uid = i.uid WHERE u.authkey = :authKey && i.id = :id;'
 		);
 		$query->setParameter('authKey', $authKey);
 		$query->setParameter('id', $id);
@@ -43,7 +43,7 @@ class ImageRepository extends ServiceEntityRepository {
 	public function getRatingCount(int $id) : array {
 		$entMan = $this->getEntityManager();
 		$query = $entMan->createQuery(
-			'SELECT i FROM App\Entity\ImageEntity i where i.id= :id;'
+			'SELECT i FROM App\Entity\Image i where i.id= :id;'
 		);
 		$query->setParameter('id', $id);
 		return $query->getResult();
@@ -51,7 +51,7 @@ class ImageRepository extends ServiceEntityRepository {
 	public function getAllRatingCounts(string $authKey, int $offset) : array {
 		$entMan = $this->getEntityManager();
 		$query = $entMan->createQuery(
-			'SELECT i FROM App\Entity\ImageEntity i where i.id = :id OFFSET :offset LIMIT 50 ;'
+			'SELECT i FROM App\Entity\Image i where i.id = :id OFFSET :offset LIMIT 50 ;'
 		);
 		$query->setParameter('id', $id);
 		$query->setParameter('offset', $offset);
@@ -60,7 +60,7 @@ class ImageRepository extends ServiceEntityRepository {
 	public function incrementVoteCount(int $id) : array {
 		$entMan = $this->getEntityManager();
 		$query = $entMan->createQuery(
-			'UPDATE App\Entity\ImageEntity i SET i.voteCount = i.voteCount + 1;'
+			'UPDATE App\Entity\Image i SET i.voteCount = i.voteCount + 1;'
 		);
 		$query->setParameter('id', $id);
 		return $query->getResult();
@@ -68,7 +68,7 @@ class ImageRepository extends ServiceEntityRepository {
 	public function decrementVoteCount(int $id) : array {
 		$entMan = $this->getEntityManager();
 		$query = $entMan->createQuery(
-			'UPDATE App\Entity\ImageEntity i SET i.voteCount = i.voteCount - 1;'
+			'UPDATE App\Entity\Image i SET i.voteCount = i.voteCount - 1;'
 		);
 		$query->setParameter('id', $id);
 		return $query->getResult();		

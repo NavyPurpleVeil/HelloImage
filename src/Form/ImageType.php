@@ -1,7 +1,7 @@
 <?php
 namespace App\Form;
 
-use App\Model\Image;
+use App\Entity\ImageFormRequest;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -16,7 +16,7 @@ class ImageType extends AbstractType {
 			'required' => false,
 			'constraints' => [
 				new File([
-					'maxSize' =>'1024k',
+					'maxSize' =>'16384k',
 					'mimeTypes' => [
 							'image/webp',
 							'image/jpeg',
@@ -31,7 +31,7 @@ class ImageType extends AbstractType {
 	
 	public function configureOptions(OptionsResolver $resolver) {
 		$resolver->setDefaults([
-			'data_class' => Image::class,
+			'data_class' => ImageFormRequest::class,
 		]);
 	}
 }

@@ -6,7 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
  */
-class UserEntity {
+class User {
 /**
 	* @ORM\Id
 	* @ORM\GeneratedValue

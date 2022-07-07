@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=ImageRepository::class)
  */
-class ImageEntity {
+class Image {
 /**
 	*	@ORM\Id
 	*	@ORM\GeneratedValue
