@@ -249,22 +249,21 @@ class ImageController extends AbstractController {
 		$rating = $RateRep->findByUid($uid);
 		// Finds ratings by user id, doesn't match imageid
 		if($rating != NULL) {
+			$ratEnt = new Rating();
+			$ratEnt->setImgId($imgId);
+			$ratEnt->setUid($uid);
+			$entMan = $doctrine->getManager();
+			$entMan->persist($ratEnt);
+			$entMan->flush();
+			$imgEnt->incrementVoteCount($imgId);
+
 			$ret = new Response();
-			$ret->setStatusCode(Response::HTTP_FORBIDDEN);
+			$ret->setStatusCode(Response::HTTP_OK);
 			return $ret;
 		}
-		// add new rating entity;
-		$ratEnt = new Rating();
-		$ratEnt->setImgId($imgId);
-		$ratEnt->setUid($uid);
-		$entMan = $doctrine->getManager();
-		$entMan->persist($ratEnt);
-		$entMan->flush();
-
-		$imgEnt->incrementVoteCount($imgId);
 
 		$ret = new Response();
-		$ret->setStatusCode(Response::HTTP_OK);
+		$ret->setStatusCode(Response::HTTP_FORBIDDEN);
 		return $ret;
 	}
 	#[Route('rating/{imgId}', methods: ['DELETE'])]
@@ -282,25 +281,17 @@ class ImageController extends AbstractController {
 		}
 
 		$uid = $user->getId();
-		$rating = $RateRep->findByUid($uid);
+		$rating = $RateRep->findByUid($uid, $imgId);
 		if($rating != NULL) {
+			$RateRep->removeByUid($uid, $imgId);
+			$imgEnt->decrementVoteCount($imgId);
 			$ret = new Response();
-			$ret->setStatusCode(Response::HTTP_FORBIDDEN);
+			$ret->setStatusCode(Response::HTTP_OK);
 			return $ret;
 		}
-		// Finds ratings by user id, doesn't match imageid
-		// Adds an entry despite the command requiring a remove
-		$ratEnt = new Rating();
-		$ratEnt->setImgId($imgId);
-		$ratEnt->setUid($uid);
-		$entMan = $doctrine->getManager();
-		$entMan->persist($ratEnt);
-		$entMan->flush();
-
-		$imgEnt->decrementVoteCount($imgId);
 
 		$ret = new Response();
-		$ret->setStatusCode(Response::HTTP_OK);
+		$ret->setStatusCode(Response::HTTP_FORBIDDEN);
 		return $ret;
 	}
 

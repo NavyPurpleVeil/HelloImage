@@ -11,13 +11,27 @@ class RatingRepository extends ServiceEntityRepository
 		parent::__construct($registry, Image::class);
 	}
 	
-	public function findByAuthKey(string $authKey, int $id) : array {
+	public function findByUid(int $uid, int $id) : array {
 		$entityManager = $this->getEntityManager();
 
 		$query = $entityManager->createQuery(
-			'SELECT u FROM App\Entity\Rating u WHERE u.authKey = :authKey '
-		)->setParameter('authKey', $authKey);
+			'SELECT u FROM App\Entity\Rating u WHERE u.uid = :uid && u.imgId = :id'
+		);
+		$query->setParameter('uid', $uid);
+		$query->setParameter('id', $id);
 		return $query->getResult();
 	}
+
+	public function removeByUid(int $uid, int $id) : array {
+		$entityManager = $this->getEntityManager();
+
+		$query = $entityManager->createQuery(
+			'DELETE u FROM App\Entity\Rating r WHERE r.uid = :uid && i.id = :id'
+		);
+		$query->setParameter('uid', $uid);
+		$query->setParameter('id', $id);
+		return $query->getResult();
+	}
+
 
 }
