@@ -16,7 +16,7 @@ class UserRepository extends ServiceEntityRepository
 		// Documentation suggests DQL requires a path to a scope;
 		// It actually 
 		$query = $entMan->createQuery(
-			'SELECT u FROM user_entity u WHERE u.authKey = :authKey '
+			'SELECT u FROM App\Entity\User u WHERE u.authKey = :authKey '
 		);
 		$query->setParameter('authKey', $authKey);
 		// An exception occurred while executing a query: SQLSTATE[HY000]: General error: 1 no such table: user
@@ -25,7 +25,7 @@ class UserRepository extends ServiceEntityRepository
 
 	// isUnique() if it is unique == Invalid key/or this key can be inserted
 	public function isUnique(string $authKey): bool {
-		if($this->findByAuthKey($authKey)->count() != 0) {
+		if(count($this->findByAuthKey($authKey)) != 0) {
 			return false;
 		}
 		return true;
