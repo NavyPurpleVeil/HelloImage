@@ -4,6 +4,7 @@ namespace App\Controller;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\HeaderBag;
+use Symfony\Component\HttpFoundation\Cookie;
 
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -41,7 +42,7 @@ class ImageController extends AbstractController {
 			0 ,255);
 		return $retVal;
 	}
-	public function authFailureResp(UserRepository $UserRep) :Response {
+	public function authFailureResp(UserRepository $UserRep, ManagerRegistry $doctrine) :Response {
 		// Handle return:
 		// 4. Check if unique.
 		// 4.1. False: Go to 1.
@@ -55,7 +56,7 @@ class ImageController extends AbstractController {
 		
 		$user = new User();
 		$user->setAuthKey($authKey);
-		$entMan = $this->getDoctrine->getManager();
+		$entMan = $doctrine->getManager();
 		$entMan->persist($user);
 		$entMan->flush();
 		
@@ -66,7 +67,7 @@ class ImageController extends AbstractController {
 	}
 
 	#[Route('image', name: "app_image_new", methods: ['POST'])] // content-type
-	public function image(Request $request, UserRepository $UserRep): Response {
+	public function image(Request $request, UserRepository $UserRep, ManagerRegistry $doctrine): Response {
 		$image = new ImageFormRequest();
 		$form = $this->createForm(ImageType::class, $image);
 		$form->handleRequest($request);
@@ -74,13 +75,13 @@ class ImageController extends AbstractController {
 		$cookies = $request->cookies->all();
 
 		if(!(array_key_exists("auth", $cookies))) {
-			return $this->authFailureResp($UserRep);
+			return $this->authFailureResp($UserRep, $doctrine);
 		}
 
 		$authKey = $cookies["auth"];
 		$user = $UserRep->findBy(array(),array('$authKey'=>$authKey));
 		if($user == NULL) { // what if it doesn't return NULL?
-			return $this->authFailureResp($UserRep);
+			return $this->authFailureResp($UserRep, $doctrine);
 		}
 
 
@@ -156,17 +157,17 @@ class ImageController extends AbstractController {
 		
 	}
 	#[Route('image/{imgId}', methods: ['DELETE'])]
-	public function imageRemove(int $imgId, UserRepository $UserRep, ImageRepository $ImgRep): Response {
+	public function imageRemove(int $imgId, UserRepository $UserRep, ImageRepository $ImgRep, ManagerRegistry $doctrine): Response {
 		$cookies = $request->cookies->all();
 
 		if(!(array_key_exists("auth", $cookies))) {
-			return $this->authFailureResp($UserRep);
+			return $this->authFailureResp($UserRep, $doctrine);
 		}
 
 		$authKey = $cookies["auth"];
 		$user = $UserRep->findBy(array(),array('$authKey'=>$authKey));
 		if($user == NULL) {
-			return $this->authFailureResp($UserRep);
+			return $this->authFailureResp($UserRep, $doctrine);
 		}
 
 		$image = $ImgRep->findByAuthKeyId($imgId, $authKey);
@@ -219,18 +220,18 @@ class ImageController extends AbstractController {
 
 	}
 	#[Route('rating/{imgId}', methods: ['POST'])]
-	public function addRating(int $imgId, UserRepository $UserRep, ImageRepository $ImgRep, RatingRepository $RateRep): Response {
+	public function addRating(int $imgId, UserRepository $UserRep, ImageRepository $ImgRep, RatingRepository $RateRep, ManagerRegistry $doctrine): Response {
 
 		$cookies = $request->cookies->all();
 
 		if(!(array_key_exists("auth", $cookies))) {
-			return $this->authFailureResp($UserRep);
+			return $this->authFailureResp($UserRep, $doctrine);
 		}
 
 		$authKey = $cookies["auth"];
 		$user = $UserRep->findBy(array(),array('$authKey'=>$authKey));
 		if($user == NULL) {
-			return $this->authFailureResp($UserRep);
+			return $this->authFailureResp($UserRep, $doctrine);
 		}
 
 		$uid = $user->getId();
@@ -255,17 +256,17 @@ class ImageController extends AbstractController {
 		return $ret;
 	}
 	#[Route('rating/{imgId}', methods: ['DELETE'])]
-	public function removeRating(int $imgId, UserRepository $UserRep, ImageRepository $ImgRep, RatingRepository $RateRep): Response {
+	public function removeRating(int $imgId, UserRepository $UserRep, ImageRepository $ImgRep, RatingRepository $, ManagerRegistry $doctrine): Response {
 		$cookies = $request->cookies->all();
 
 		if(!(array_key_exists("auth", $cookies))) {
-			return $this->authFailureResp($UserRep);
+			return $this->authFailureResp($UserRep, $doctrine);
 		}
 
 		$authKey = $cookies["auth"];
 		$user = $UserRep->findBy(array(),array('$authKey'=>$authKey));
 		if($user == NULL) {
-			return $this->authFailureResp($UserRep);
+			return $this->authFailureResp($UserRep, $doctrine);
 		}
 
 		$uid = $user->getId();
@@ -286,17 +287,17 @@ class ImageController extends AbstractController {
 
 
 	#[Route('list', methods: ['GET'])]
-	public function listLogin(int $id, UserRepository $UserRep, ImageRepository $ImgRep): Response {
+	public function listLogin(int $id, UserRepository $UserRep, ImageRepository $ImgRep, ManagerRegistry $doctrine): Response {
 		$cookies = $request->cookies->all();
 
 		if(!(array_key_exists("auth", $cookies))) {
-			return $this->authFailureResp($UserRep);
+			return $this->authFailureResp($UserRep, $doctrine);
 		}
 
 		$authKey = $cookies["auth"];
 		$user = $UserRep->findBy(array(),array('$authKey'=>$authKey));
 		if($user == NULL) {
-			return $this->authFailureResp($UserRep);
+			return $this->authFailureResp($UserRep, $doctrine);
 		}
 	}
 	#[Route('list/{id}', methods: ['GET'])]
