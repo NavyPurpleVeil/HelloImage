@@ -1,16 +1,9 @@
 <?php
-namespace App\Entity;
+namespace App\Model;
 
 use App\Repository\ProductRepository;
-use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass=ImageRepository::class)
- */
 class ImageFormRequest {
-/**
-	*	@ORM\Column(type="string")
-	*/
 		private $filename;
 
 		public function getFilename(): ?string {

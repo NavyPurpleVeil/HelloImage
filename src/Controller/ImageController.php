@@ -21,7 +21,7 @@ use Doctrine\Persistence\ManagerRegistry;
 
 use App\Entity\User;
 use App\Entity\Image;
-use App\Entity\ImageFormRequest;
+use App\Model\ImageFormRequest;
 use App\Entity\Rating;
 
 use App\Repository\UserRepository;
