@@ -177,7 +177,7 @@ class ImageController extends AbstractController {
 		}
 		
 		$filename = $this->getParameter('image_dir') . strval($ImgRep->getId()) . $ImgRep->getExtension();
-		new Filesystem.remove($filename);
+		new Filesystem().remove($filename);
 		$ImgRep->removeByAuthKeyId($imgId, $authKey);
 
 		$ret = new Response();

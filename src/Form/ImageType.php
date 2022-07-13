@@ -1,7 +1,7 @@
 <?php
 namespace App\Form;
 
-use App\Entity\ImageFormRequest;
+use App\Model\ImageFormRequest;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;

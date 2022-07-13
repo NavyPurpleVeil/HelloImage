@@ -13,11 +13,13 @@ class UserRepository extends ServiceEntityRepository
 	
 	public function findByAuthKey(string $authKey) : array {
 		$entMan = $this->getEntityManager();
-
+		// Documentation suggests DQL requires a path to a scope;
+		// It actually 
 		$query = $entMan->createQuery(
-			'SELECT u FROM App\Entity\User u WHERE u.authKey = :authKey '
+			'SELECT u FROM user_entity u WHERE u.authKey = :authKey '
 		);
 		$query->setParameter('authKey', $authKey);
+		// An exception occurred while executing a query: SQLSTATE[HY000]: General error: 1 no such table: user
 		return $query->getResult();
 	}
 
