@@ -79,7 +79,7 @@ class ImageController extends AbstractController {
 		}
 
 		$authKey = $cookies["auth"];
-		$user = $UserRep->findBy(array(),array('$authKey'=>$authKey));
+		$user = $UserRep->findBy(array(),array('$auth_key'=>$authKey));
 		if($user == NULL) { // what if it doesn't return NULL?
 			return $this->authFailureResp($UserRep, $doctrine);
 		}
@@ -165,7 +165,7 @@ class ImageController extends AbstractController {
 		}
 
 		$authKey = $cookies["auth"];
-		$user = $UserRep->findBy(array(),array('$authKey'=>$authKey));
+		$user = $UserRep->findBy(array(),array('$auth_key'=>$authKey));
 		if($user == NULL) {
 			return $this->authFailureResp($UserRep, $doctrine);
 		}
@@ -229,7 +229,7 @@ class ImageController extends AbstractController {
 		}
 
 		$authKey = $cookies["auth"];
-		$user = $UserRep->findBy(array(),array('$authKey'=>$authKey));
+		$user = $UserRep->findBy(array(),array('$auth_key'=>$authKey));
 		if($user == NULL) {
 			return $this->authFailureResp($UserRep, $doctrine);
 		}
@@ -256,7 +256,7 @@ class ImageController extends AbstractController {
 		return $ret;
 	}
 	#[Route('rating/{imgId}', methods: ['DELETE'])]
-	public function removeRating(int $imgId, UserRepository $UserRep, ImageRepository $ImgRep, RatingRepository $, ManagerRegistry $doctrine): Response {
+	public function removeRating(int $imgId, UserRepository $UserRep, ImageRepository $ImgRep, RatingRepository $RateRep, ManagerRegistry $doctrine): Response {
 		$cookies = $request->cookies->all();
 
 		if(!(array_key_exists("auth", $cookies))) {
@@ -264,7 +264,7 @@ class ImageController extends AbstractController {
 		}
 
 		$authKey = $cookies["auth"];
-		$user = $UserRep->findBy(array(),array('$authKey'=>$authKey));
+		$user = $UserRep->findBy(array(),array('$auth_key'=>$authKey));
 		if($user == NULL) {
 			return $this->authFailureResp($UserRep, $doctrine);
 		}
@@ -295,7 +295,7 @@ class ImageController extends AbstractController {
 		}
 
 		$authKey = $cookies["auth"];
-		$user = $UserRep->findBy(array(),array('$authKey'=>$authKey));
+		$user = $UserRep->findBy(array(),array('$auth_key'=>$authKey));
 		if($user == NULL) {
 			return $this->authFailureResp($UserRep, $doctrine);
 		}
