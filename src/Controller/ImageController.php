@@ -67,7 +67,6 @@ class ImageController extends AbstractController {
 
 	#[Route('image', name: "app_image_new", methods: ['POST'])] // content-type
 	public function image(Request $request, UserRepository $UserRep): Response {
-		// access the imageRequest model
 		$image = new ImageFormRequest();
 		$form = $this->createForm(ImageType::class, $image);
 		$form->handleRequest($request);
@@ -77,8 +76,7 @@ class ImageController extends AbstractController {
 		if(!(array_key_exists("auth", $cookies))) {
 			return $this->authFailureResp($UserRep);
 		}
-		// check against the database
-		// sendback a cookie if this one doesn't exist
+
 		$authKey = $cookies["auth"];
 		$user = $UserRep->findBy(array(),array('$authKey'=>$authKey));
 		if($user == NULL) { // what if it doesn't return NULL?
@@ -100,19 +98,11 @@ class ImageController extends AbstractController {
 			return $ret;
 		}
 
-		// We don't need to get the file info
 		$originalFilename = pathinfo($imageFile->getClientOriginalName());
 		$safeFilename = $slugger->slug($originalFilename);
 
-		// TODO: broken .uniqid() can't generate trully unique values[the function doesn't take any parameter that would allow it to]
-		// Find suitable implementation;
-		// Bodge 1:
-		// Database id auto increments, add an entry with string .guessExtension();
-		// 
-
 
 		$entMan = $doctrine->getManager();
-		// add a new entry
 		$extension = "." . $imageFile->guessExtension();
 
 		$imgEnt = new Image();
@@ -121,8 +111,6 @@ class ImageController extends AbstractController {
 		$entMan->persist($imgEnt);
 		$entMan->flush();
 
-		// Encja nadal posiada id? Posiada, ponieważ obiekty idą po referencji.
-		// W kodzie źródłowym symfony widać, że trackowany jest oryginalny obiekt, i updajtowane id/key obiektu encji.
 
 		$fileId = strval($imgEnt->getId());
 		$filename = $fileId . $extension;
