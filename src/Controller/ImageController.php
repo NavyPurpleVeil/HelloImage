@@ -79,7 +79,7 @@ class ImageController extends AbstractController {
 		}
 
 		$authKey = $cookies["auth"];
-		$user = $UserRep->findBy(array(),array('$auth_key'=>$authKey));
+		$user = $UserRep->findByParameter(array('auth_key'=>$authKey));
 		if($user == NULL) { // what if it doesn't return NULL?
 			return $this->authFailureResp($UserRep, $doctrine);
 		}
@@ -165,7 +165,7 @@ class ImageController extends AbstractController {
 		}
 
 		$authKey = $cookies["auth"];
-		$user = $UserRep->findBy(array(),array('$auth_key'=>$authKey));
+		$user = $UserRep->findByParameter(array('auth_key'=>$authKey));
 		if($user == NULL) {
 			return $this->authFailureResp($UserRep, $doctrine);
 		}
@@ -229,7 +229,7 @@ class ImageController extends AbstractController {
 		}
 
 		$authKey = $cookies["auth"];
-		$user = $UserRep->findBy(array(),array('$auth_key'=>$authKey));
+		$user = $UserRep->findByParameter(array('auth_key'=>$authKey));
 		if($user == NULL) {
 			return $this->authFailureResp($UserRep, $doctrine);
 		}
@@ -264,7 +264,7 @@ class ImageController extends AbstractController {
 		}
 
 		$authKey = $cookies["auth"];
-		$user = $UserRep->findBy(array(),array('$auth_key'=>$authKey));
+		$user = $UserRep->findByParameter(array('auth_key'=>$authKey));
 		if($user == NULL) {
 			return $this->authFailureResp($UserRep, $doctrine);
 		}
@@ -295,7 +295,7 @@ class ImageController extends AbstractController {
 		}
 
 		$authKey = $cookies["auth"];
-		$user = $UserRep->findBy(array(),array('$auth_key'=>$authKey));
+		$user = $UserRep->findByParameter(array('auth_key'=>$authKey));
 		if($user == NULL) {
 			return $this->authFailureResp($UserRep, $doctrine);
 		}
